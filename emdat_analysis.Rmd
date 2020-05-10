@@ -1,0 +1,216 @@
+---
+title: "emdat_analysis"
+author: "Mengxin Tan"
+date: "5/8/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(readxl)
+CHI_Natural <- read_excel("CHI_Natural.xlsx", 
+                          col_types = c("text", "numeric", "text", 
+                                        "text", "text", "text", "text", "text", 
+                                        "text", "text", "text", "text", "text", 
+                                        "text", "text", "text", "text", "text", 
+                                        "text", "text", "text", "numeric", 
+                                        "numeric", "text", "numeric", "numeric", 
+                                        "text", "text", "numeric", "numeric", 
+                                        "numeric", "numeric", "numeric", 
+                                        "numeric", "numeric", "numeric", 
+                                        "numeric", "numeric", "numeric", 
+                                        "numeric", "numeric", "numeric", 
+                                        "numeric", "numeric", "numeric"))
+```
+```{r}
+CHI_Tech <- read_excel("CHI_Tech.xlsx", 
+                          col_types = c("text", "numeric", "text", 
+                                        "text", "text", "text", "text", "text", 
+                                        "text", "text", "text", "text", "text", 
+                                        "text", "text", "text", "text", "text", 
+                                        "text", "text", "text", "numeric", 
+                                        "numeric", "text", "numeric", "numeric", 
+                                        "text", "text", "numeric", "numeric", 
+                                        "numeric", "numeric", "numeric", 
+                                        "numeric", "numeric", "numeric", 
+                                        "numeric", "numeric", "numeric", 
+                                        "numeric", "numeric", "numeric", 
+                                        "numeric", "numeric", "numeric"))
+```
+```{r}
+CHI_Whole <- read_excel("CHI_whole.xlsx", 
+                          col_types = c("text", "numeric", "text", 
+                                        "text", "text", "text", "text", "text", 
+                                        "text", "text", "text", "text", "text", 
+                                        "text", "text", "text", "text", "text", 
+                                        "text", "text", "text", "numeric", 
+                                        "numeric", "text", "numeric", "numeric", 
+                                        "text", "text", "numeric", "numeric", 
+                                        "numeric", "numeric", "numeric", 
+                                        "numeric", "numeric", "numeric", 
+                                        "numeric", "numeric", "numeric", 
+                                        "numeric", "numeric", "numeric", 
+                                        "numeric", "numeric", "numeric"))
+```
+
+# Count the number of accidents
+```{r}
+library(dplyr)
+library(tidyverse)
+library(ggplot2)
+```
+```{r}
+# natural disaters 
+# No. by year
+ggplot(data = CHI_Natural, aes(Year))+geom_bar(aes(fill = CHI_Natural$`Disaster Type`))+theme(legend.title = element_blank()) 
+```
+```{r}
+#########
+no_of_death_by_year <- data.frame(aggregate(CHI_Natural$`Total Deaths`, by=list(Year = CHI_Natural$Year), FUN = sum, na.rm = T))
+no_of_death_by_year$x <- log(no_of_death_by_year$x)
+```
+
+
+```{r}
+# natural disaster
+# log number of death by year after 1949
+ggplot(data = subset(no_of_death_by_year, Year>1948), aes(x = Year, y =x)) + geom_line() + geom_point() + ylab(label = "Number of Death(log)")
+```
+
+
+```{r}
+# natural 
+# log no of affacted by year
+no_of_affacted_by_year <- data.frame(aggregate(CHI_Natural$`Total Affected`, by=list(Year = CHI_Natural$Year), FUN = sum, na.rm = T))
+no_of_affacted_by_year$x <- log(no_of_affacted_by_year$x)
+```
+
+
+```{r}
+# natural disaster
+# log number of Total Affacted ~ year after 1949
+ggplot(data = subset(no_of_affacted_by_year, Year>1948), aes(x = Year, y =x)) + geom_line() + geom_point() + ylab("Total Number Affacted(log)")
+```
+
+
+```{r}
+# natural 
+# log damage by year
+damage_by_year <- data.frame(aggregate(CHI_Natural$`Total Damages ('000 US$)`, by=list(Year = CHI_Natural$Year), FUN = sum, na.rm = T))
+damage_by_year$x <- log(damage_by_year$x)
+```
+```{r}
+# natural disaster
+# log number of death by year after 1949
+ggplot(data = subset(damage_by_year, Year>1948), aes(x = Year, y =x)) + geom_line() + geom_point() + ylab("Total Damage in 1000$(log)")
+```
+
+
+```{r}
+# natrual disasters
+# total number affacted ~ disaster subgroup
+ggplot(data = CHI_Natural, aes(x = CHI_Natural$`Disaster Subgroup`, y = log(CHI_Natural$`Total Affected`), fill = CHI_Natural$`Disaster Subgroup`)) + geom_boxplot() + xlab("Disaster Subgroup") + ylab("Total Number Affacted(log)") +theme(legend.title = element_blank(), axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+```{r}
+# total affacted ~ disaster type
+ggplot(data = CHI_Natural, aes(x = CHI_Natural$`Disaster Type`, y = log(CHI_Natural$`Total Affected`), fill = CHI_Natural$`Disaster Type`)) + geom_boxplot() + xlab("Disaster Type") + ylab("Total Number Affacted(log)") + theme(legend.title = element_blank(), axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+```{r}
+# total death ~ disaster type
+ggplot(data = CHI_Natural, aes(x = CHI_Natural$`Disaster Type`, y = log(CHI_Natural$`Total Deaths`), fill = CHI_Natural$`Disaster Type`)) + geom_boxplot() + xlab("Disaster Type") + ylab("Total Deaths(log)") + theme(legend.title = element_blank(), axis.text.x = element_text(angle = 45, hjust = 1))
+```
+```{r}
+# total damage ~ disaster type
+ggplot(data = CHI_Natural, aes(x = CHI_Natural$`Disaster Type`, y = log(CHI_Natural$`Total Damages ('000 US$)`), fill = CHI_Natural$`Disaster Type`)) + geom_boxplot() + xlab("Disaster Type") + ylab("Total Damage in $1000(log)") + theme(legend.title = element_blank(), axis.text.x = element_text(angle = 45, hjust = 1))
+```
+```{r}
+# log deaths ~ log affacted | size = total damage
+ggplot(data = CHI_Natural, aes(x = log(CHI_Natural$`Total Affected`), y = log(CHI_Natural$`Total Deaths`))) + geom_point(aes(size = CHI_Natural$`Total Damages ('000 US$)`, color = CHI_Natural$`Disaster Type`)) + geom_smooth(method = lm, se = F) + labs(x = "Total Number Affacted(log)", y = "Total Deaths(log)") + theme(legend.title = element_blank())
+```
+
+# Technological disasters
+
+```{r}
+# count the accidents by year after 1949
+ggplot(data = subset(CHI_Tech, Year > 1948), aes(Year))+geom_bar(aes(fill = `Disaster Subtype`))+theme(legend.title = element_blank()) 
+```
+
+```{r}
+# death ~ year
+no_of_death_by_year2 <- data.frame(aggregate(CHI_Tech$`Total Deaths`, by=list(Year = CHI_Tech$Year), FUN = sum, na.rm = T))
+#no_of_death_by_year2$x <- log(no_of_death_by_year2$x)
+```
+
+
+```{r}
+# number of death ~ year after 1970
+ggplot(data = subset(no_of_death_by_year2, Year>1969), aes(x = Year, y =x)) + geom_line() + geom_point() + ylab(label = "Number of Death")
+```
+
+```{r}
+# total affacted ~ year
+no_of_affacted_by_year2 <- data.frame(aggregate(CHI_Tech$`Total Affected`, by=list(Year = CHI_Tech$Year), FUN = sum, na.rm = T))
+no_of_affacted_by_year2$x <- log(no_of_affacted_by_year2$x)
+```
+
+
+```{r}
+# number of affacted ~ year after 1970
+ggplot(data = subset(no_of_affacted_by_year2, Year>1969), aes(x = Year, y =x)) + geom_line() + geom_point() + ylab(label = "Number of Total Affacted(log)")
+```
+
+```{r}
+# total damage ~ year
+damage_by_year2 <- data.frame(aggregate(CHI_Tech$`Total Damages ('000 US$)`, by=list(Year = CHI_Tech$Year), FUN = sum, na.rm = T))
+damage_by_year2$x <- log(damage_by_year2$x)
+```
+
+
+```{r}
+# damage ~ year after 1970
+ggplot(data = subset(damage_by_year2, Year>1969), aes(x = Year, y =x)) + geom_line() + geom_point() + ylab(label = "Total Damage in $1000(log)")
+```
+
+```{r}
+# total number affacted ~ disaster type
+ggplot(data = CHI_Tech, aes(x = CHI_Tech$`Disaster Type`, y = log(CHI_Tech$`Total Affected`), fill = CHI_Tech$`Disaster Type`)) + geom_boxplot() + xlab("Disaster Type") + ylab("Total Number Affacted(log)") +theme(legend.title = element_blank(), axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+```{r}
+# total death ~ disaster type
+ggplot(data = CHI_Tech, aes(x = CHI_Tech$`Disaster Type`, y = log(CHI_Tech$`Total Deaths`), fill = CHI_Tech$`Disaster Type`)) + geom_boxplot() + xlab("Disaster Type") + ylab("Total Deaths(log)") +theme(legend.title = element_blank(), axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+
+```{r}
+# total number affacted ~ disaster subtype
+ggplot(data = CHI_Tech, aes(x = CHI_Tech$`Disaster Subtype`, y = log(CHI_Tech$`Total Affected`), fill = CHI_Tech$`Disaster Subtype`)) + geom_boxplot() + xlab("Disaster Subtype") + ylab("Total Number Affacted(log)") +theme(legend.title = element_blank(), axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+```{r}
+# total death ~ disaster subtype
+ggplot(data = CHI_Tech, aes(x = CHI_Tech$`Disaster Subtype`, y = log(CHI_Tech$`Total Deaths`), fill = CHI_Tech$`Disaster Subtype`)) + geom_boxplot() + xlab("Disaster Subtype") + ylab("Total Deaths(log)") +theme(legend.title = element_blank(), axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+```{r}
+# total damage ~ disaster subtype
+ggplot(data = CHI_Tech, aes(x = CHI_Tech$`Disaster Subtype`, y = log(CHI_Tech$`Total Damages ('000 US$)`), fill = CHI_Tech$`Disaster Subtype`)) + geom_boxplot() + xlab("Disaster Subtype") + ylab("Total Damage in $1000(log)") +theme(legend.title = element_blank(), axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+```{r}
+# total damage ~ disaster type
+ggplot(data = CHI_Tech, aes(x = CHI_Tech$`Disaster Type`, y = log(CHI_Tech$`Total Damages ('000 US$)`), fill = CHI_Tech$`Disaster Type`)) + geom_boxplot() + xlab("Disaster Type") + ylab("Total Damage in $1000(log)") +theme(legend.title = element_blank(), axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+```{r}
+# log deaths ~ log affacted | color = disaster subtype
+ggplot(data = CHI_Tech, aes(x = log(CHI_Tech$`Total Affected`), y = log(CHI_Tech$`Total Deaths`))) + geom_point(aes(color = CHI_Tech$`Disaster Subtype`)) + geom_smooth(method = lm, se = F) + labs(x = "Total Number Affacted(log)", y = "Total Deaths(log)") + theme(legend.title = element_blank())
+```
+
+
+
